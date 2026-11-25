@@ -1,0 +1,658 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Grauhorn Alpine</title>
+<meta name="description" content="Grauhorn — a high-alpine ski and snowboard resort. 2,940 m of quiet, 118 km of pistes, one grey mountain.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@62..125,300..900&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+:root{
+  --snow:#F4F4F2;
+  --paper:#E8E8E5;
+  --frost:#D3D4D2;
+  --fog:#A9ACAE;
+  --slate:#5D6266;
+  --rock:#33373A;
+  --graphite:#16181A;
+  --line:rgba(22,24,26,.14);
+  --mono:"IBM Plex Mono", ui-monospace, monospace;
+  --sans:"Archivo", system-ui, sans-serif;
+  --gutter:clamp(16px,4vw,56px);
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html{scroll-behavior:smooth}
+body{background:var(--snow);color:var(--graphite);font-family:var(--sans);font-variation-settings:"wdth" 100;-webkit-font-smoothing:antialiased;overflow-x:hidden}
+img{display:block;max-width:100%}
+a{color:inherit;text-decoration:none}
+.mono{font-family:var(--mono);font-size:12px;letter-spacing:.08em;text-transform:uppercase}
+.bw{filter:grayscale(1) contrast(1.06) brightness(1.02)}
+
+/* ---------- trail + riders ---------- */
+#trail{position:absolute;left:0;top:0;pointer-events:none;z-index:6;overflow:visible;mix-blend-mode:difference}
+#trail .ghost{fill:none;stroke:#fff;stroke-opacity:.16;stroke-width:1.2;stroke-dasharray:2 9;stroke-linecap:round}
+#trail .cut{fill:none;stroke:#fff;stroke-opacity:.4;stroke-width:2.2;stroke-linecap:round}
+#trail .cut.ski{stroke-opacity:.22;stroke-width:1.4}
+.rider *{fill:none;stroke:#fff;stroke-width:4.2;stroke-linecap:round;stroke-linejoin:round}
+.rider .head{fill:#fff;stroke:none}
+.rider .board{fill:#fff}
+.rider .halo{display:none}
+
+/* ---------- altimeter ---------- */
+.alti{position:fixed;right:18px;top:50%;transform:translateY(-50%);z-index:20;display:flex;align-items:center;gap:10px;mix-blend-mode:difference;color:#fff}
+.alti__scale{position:relative;width:10px;height:42vh;background:repeating-linear-gradient(to bottom,#fff 0 1px,transparent 1px 12px);opacity:.7}
+.alti__scale::after{content:"";position:absolute;right:0;top:0;bottom:0;width:1px;background:#fff}
+.alti__mark{position:absolute;right:-4px;width:18px;height:2px;background:#fff;top:0;transition:top .1s linear}
+.alti__read{writing-mode:vertical-rl;transform:rotate(180deg);font-family:var(--mono);font-size:11px;letter-spacing:.14em}
+.alti__read b{font-weight:500}
+
+/* ---------- nav ---------- */
+.nav{position:fixed;inset:0 0 auto 0;z-index:30;display:flex;align-items:center;justify-content:space-between;padding:18px var(--gutter);transition:background .4s,color .4s,padding .4s;color:var(--snow)}
+.nav.is-solid{background:rgba(244,244,242,.86);backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);color:var(--graphite);padding-block:12px;border-bottom:1px solid var(--line)}
+.brand{display:flex;align-items:center;gap:12px}
+.brand svg{width:38px;height:38px}
+.brand__word{font-weight:850;font-variation-settings:"wdth" 125;font-size:17px;letter-spacing:.16em;line-height:1}
+.brand__word small{display:block;font-family:var(--mono);font-weight:400;font-size:9.5px;letter-spacing:.22em;margin-top:5px;opacity:.7}
+.nav__links{display:flex;gap:30px}
+.nav__links a{font-family:var(--mono);font-size:12px;letter-spacing:.1em;text-transform:uppercase;position:relative}
+.nav__links a::after{content:"";position:absolute;left:0;right:100%;bottom:-4px;height:1px;background:currentColor;transition:right .3s}
+.nav__links a:hover::after{right:0}
+.btn{display:inline-flex;align-items:center;gap:10px;font-family:var(--mono);font-size:12px;letter-spacing:.12em;text-transform:uppercase;padding:12px 18px;border:1px solid currentColor;transition:background .25s,color .25s}
+.btn:hover{background:var(--graphite);color:var(--snow);border-color:var(--graphite)}
+.nav:not(.is-solid) .btn:hover{background:var(--snow);color:var(--graphite);border-color:var(--snow)}
+.btn--fill{background:var(--graphite);color:var(--snow);border-color:var(--graphite)}
+.btn--fill:hover{background:transparent;color:var(--graphite)}
+
+/* ---------- hero ---------- */
+.hero{position:relative;height:100svh;min-height:640px;overflow:hidden;color:var(--snow);background:var(--graphite)}
+.hero__img{position:absolute;inset:-6% 0 0 0;width:100%;height:112%;object-fit:cover;opacity:.78;will-change:transform}
+.hero::after{content:"";position:absolute;inset:0;background:linear-gradient(180deg,rgba(22,24,26,.55) 0%,rgba(22,24,26,0) 32%,rgba(22,24,26,0) 55%,rgba(22,24,26,.6) 100%)}
+.hero__inner{position:absolute;inset:0;z-index:3;display:grid;grid-template-rows:1fr auto;padding:110px var(--gutter) 28px}
+.hero__coords{align-self:start;display:flex;justify-content:space-between;gap:20px;opacity:.85}
+.hero__title{font-weight:900;font-variation-settings:"wdth" 125;font-size:clamp(44px,13.6vw,250px);line-height:.8;letter-spacing:-.02em;white-space:nowrap;margin-left:-.04em}
+.hero__title span{display:inline-block;transform:translateY(105%);animation:rise 1.2s cubic-bezier(.2,.7,0,1) forwards}
+.hero__clip{overflow:hidden;padding-bottom:.04em}
+.hero__foot{display:grid;grid-template-columns:1.2fr 1fr auto;gap:28px;align-items:end;margin-top:26px;border-top:1px solid rgba(244,244,242,.35);padding-top:20px}
+.hero__lede{font-size:clamp(17px,1.6vw,22px);font-weight:400;line-height:1.35;max-width:34ch}
+.cond{display:grid;grid-template-columns:repeat(4,auto);gap:6px 26px;font-family:var(--mono);font-size:11px;letter-spacing:.1em;text-transform:uppercase}
+.cond dt{opacity:.6}
+.cond dd{font-size:20px;letter-spacing:0;font-family:var(--sans);font-weight:600;font-variation-settings:"wdth" 110}
+.cond .live{display:inline-block;width:7px;height:7px;border-radius:50%;background:var(--snow);margin-right:7px;animation:blink 1.6s infinite}
+.drop{writing-mode:vertical-rl;font-family:var(--mono);font-size:11px;letter-spacing:.2em;text-transform:uppercase;display:flex;align-items:center;gap:12px}
+.drop i{display:block;width:1px;height:56px;background:currentColor;transform-origin:top;animation:drip 2s infinite}
+@keyframes rise{to{transform:none}}
+@keyframes blink{50%{opacity:.25}}
+@keyframes drip{0%{transform:scaleY(0)}50%{transform:scaleY(1);transform-origin:top}51%{transform-origin:bottom}100%{transform:scaleY(0);transform-origin:bottom}}
+
+/* ---------- generic ---------- */
+section{position:relative}
+.wrap{padding:0 var(--gutter)}
+.label{display:flex;align-items:center;gap:12px;color:var(--slate)}
+.label::before{content:"";width:28px;height:1px;background:currentColor}
+.reveal{opacity:0;transform:translateY(36px);transition:opacity 1s,transform 1s cubic-bezier(.2,.7,0,1)}
+.reveal.in{opacity:1;transform:none}
+h2{font-weight:850;font-variation-settings:"wdth" 118;font-size:clamp(40px,6.4vw,104px);line-height:.9;letter-spacing:-.02em}
+h2 em{font-style:normal;font-weight:300;font-variation-settings:"wdth" 70;color:var(--slate)}
+
+/* ---------- manifesto ---------- */
+.manifesto{padding:clamp(110px,16vw,220px) 0 clamp(80px,10vw,140px)}
+.manifesto__grid{display:grid;grid-template-columns:5fr 4fr;gap:clamp(30px,6vw,100px);align-items:end}
+.manifesto p.big{font-size:clamp(24px,2.7vw,40px);line-height:1.18;font-weight:400;letter-spacing:-.01em;max-width:24ch;margin-top:34px}
+.manifesto p.big b{font-weight:700}
+.manifesto__photo{position:relative;aspect-ratio:4/5;overflow:hidden}
+.manifesto__photo img{width:100%;height:120%;object-fit:cover;will-change:transform}
+.manifesto__photo figcaption{position:absolute;left:14px;bottom:12px;color:var(--snow)}
+.stats{display:grid;grid-template-columns:repeat(4,1fr);margin-top:clamp(60px,8vw,120px);border-top:1px solid var(--line)}
+.stat{padding:26px 20px 0 0;border-right:1px solid var(--line)}
+.stat:last-child{border-right:0}
+.stat:not(:first-child){padding-left:20px}
+.stat b{display:block;font-weight:800;font-variation-settings:"wdth" 120;font-size:clamp(42px,5.4vw,88px);line-height:1;letter-spacing:-.03em}
+.stat b sup{font-size:.36em;font-weight:500;vertical-align:top;margin-left:4px;letter-spacing:0}
+.stat span{display:block;margin-top:10px;color:var(--slate)}
+
+/* ---------- offer ---------- */
+.offer{background:var(--paper);padding:clamp(90px,12vw,170px) 0}
+.offer__head{display:flex;justify-content:space-between;align-items:end;gap:30px;margin-bottom:60px}
+.offer__head p{max-width:36ch;color:var(--slate);font-size:17px;line-height:1.5}
+.rows{border-top:1px solid var(--graphite)}
+.row{display:grid;grid-template-columns:70px 1.1fr 1.4fr 140px;gap:24px;align-items:baseline;padding:30px 0;border-bottom:1px solid var(--line);cursor:default;position:relative;transition:padding .35s}
+.row::before{content:"";position:absolute;inset:0;background:var(--graphite);transform:scaleY(0);transform-origin:bottom;transition:transform .45s cubic-bezier(.2,.7,0,1);z-index:0}
+.row > *{position:relative;z-index:1;transition:color .3s}
+.row:hover::before{transform:scaleY(1)}
+.row:hover > *{color:var(--snow)}
+.row:hover{padding-inline:22px}
+.row__n{font-family:var(--mono);font-size:13px;color:var(--slate)}
+.row__t{font-weight:800;font-variation-settings:"wdth" 115;font-size:clamp(24px,2.6vw,40px);line-height:1;letter-spacing:-.01em}
+.row__d{font-size:16px;line-height:1.5;color:var(--rock);max-width:52ch}
+.row__tag{font-family:var(--mono);font-size:11px;letter-spacing:.1em;text-transform:uppercase;text-align:right;color:var(--slate)}
+.row__img{display:none}
+.peek{position:fixed;left:0;top:0;width:300px;height:380px;z-index:25;pointer-events:none;overflow:hidden;opacity:0;transform:translate(-50%,-50%) scale(.85) rotate(-3deg);transition:opacity .3s,transform .4s cubic-bezier(.2,.7,0,1)}
+.peek.on{opacity:1;transform:translate(-50%,-50%) scale(1) rotate(2deg)}
+.peek img{width:100%;height:100%;object-fit:cover}
+
+/* ---------- ride (horizontal gallery) ---------- */
+.ride{height:330vh;background:var(--graphite);color:var(--snow)}
+.ride__sticky{position:sticky;top:0;height:100vh;overflow:hidden;display:flex;flex-direction:column;justify-content:center}
+.ride__top{display:flex;justify-content:space-between;align-items:end;padding:0 var(--gutter);margin-bottom:38px;gap:24px}
+.ride__top h2 em{color:var(--fog)}
+.ride__track{display:flex;gap:22px;padding:0 var(--gutter);will-change:transform}
+.shot{flex:0 0 auto;height:54vh;position:relative;overflow:hidden}
+.shot img{height:100%;width:auto;object-fit:cover;transition:transform 1.2s cubic-bezier(.2,.7,0,1)}
+.shot:hover img{transform:scale(1.05)}
+.shot figcaption{position:absolute;left:12px;bottom:10px;right:12px;display:flex;justify-content:space-between}
+.shot.w{width:44vh}.shot.x{width:80vh}.shot.m{width:62vh}
+.shot.text{width:52vh;display:flex;flex-direction:column;justify-content:space-between;padding:4px 0}
+.shot.text p{font-size:clamp(22px,2.4vw,34px);line-height:1.15;font-weight:300;font-variation-settings:"wdth" 90}
+.ride__bar{position:absolute;left:var(--gutter);right:var(--gutter);bottom:32px;height:1px;background:rgba(244,244,242,.2)}
+.ride__bar i{display:block;height:100%;background:var(--snow);width:0}
+
+/* ---------- runs ---------- */
+.runs{padding:clamp(90px,12vw,170px) 0}
+.runs__grid{display:grid;grid-template-columns:4fr 7fr;gap:clamp(30px,6vw,100px)}
+.legend{display:grid;gap:14px;margin-top:40px}
+.legend div{display:flex;gap:14px;align-items:center;font-size:15px}
+.mk{width:16px;height:16px;flex:0 0 16px;display:inline-block}
+.mk.easy{border-radius:50%;background:var(--snow);border:1.5px solid var(--graphite)}
+.mk.mid{background:var(--fog)}
+.mk.hard{background:var(--graphite);transform:rotate(45deg) scale(.8)}
+.mk.free{border:1.5px solid var(--graphite);transform:rotate(45deg) scale(.8);background:repeating-linear-gradient(45deg,var(--graphite) 0 2px,transparent 2px 5px)}
+.runlist{border-top:1px solid var(--graphite)}
+.run{display:grid;grid-template-columns:24px 1fr 170px 90px;gap:18px;align-items:center;padding:18px 0;border-bottom:1px solid var(--line)}
+.run h3{font-weight:700;font-variation-settings:"wdth" 108;font-size:21px}
+.run h3 small{display:block;font-weight:400;font-size:13px;color:var(--slate);margin-top:3px;font-variation-settings:"wdth" 100}
+.run svg{width:170px;height:34px}
+.run svg path{fill:none;stroke:var(--graphite);stroke-width:1.5}
+.run svg path.a{fill:var(--frost);stroke:none}
+.run .len{font-family:var(--mono);font-size:12px;text-align:right;color:var(--slate)}
+
+/* ---------- passes ---------- */
+.passes{background:var(--paper);padding:clamp(90px,12vw,170px) 0}
+.passes__cards{display:grid;grid-template-columns:repeat(3,1fr);gap:0;margin-top:60px;border:1px solid var(--graphite)}
+.pass{padding:34px 30px 30px;display:flex;flex-direction:column;gap:22px;min-height:430px;border-right:1px solid var(--graphite);transition:background .35s,color .35s}
+.pass:last-child{border-right:0}
+.pass:hover{background:var(--graphite);color:var(--snow)}
+.pass:hover .pass__list li{border-color:rgba(244,244,242,.18)}
+.pass:hover .btn{border-color:var(--snow)}
+.pass__name{display:flex;justify-content:space-between;align-items:center}
+.pass__price{font-weight:850;font-variation-settings:"wdth" 120;font-size:clamp(54px,5.2vw,84px);line-height:.9;letter-spacing:-.03em}
+.pass__price sub{font-family:var(--mono);font-size:12px;font-weight:400;letter-spacing:.08em;vertical-align:baseline;margin-left:6px}
+.pass__list{list-style:none;font-size:15px;line-height:1.4;flex:1}
+.pass__list li{padding:10px 0;border-top:1px solid var(--line)}
+.pass .btn{justify-content:center}
+
+/* ---------- footer ---------- */
+.foot{background:var(--graphite);color:var(--snow);padding:clamp(90px,12vw,160px) 0 30px;overflow:hidden;position:relative}
+.foot__big{display:flex;align-items:center;gap:clamp(16px,3vw,40px)}
+.foot__big svg{width:clamp(80px,13vw,200px);height:auto;flex:0 0 auto}
+.foot__big h2{font-size:clamp(44px,9vw,150px)}
+.foot__big h2 em{color:var(--fog)}
+.foot__cols{display:grid;grid-template-columns:2fr 1fr 1fr 1fr;gap:30px;margin-top:clamp(60px,8vw,110px);padding-top:30px;border-top:1px solid rgba(244,244,242,.2)}
+.foot__cols h4{font-family:var(--mono);font-weight:400;font-size:11px;letter-spacing:.14em;text-transform:uppercase;opacity:.55;margin-bottom:14px}
+.foot__cols p,.foot__cols a{display:block;font-size:15px;line-height:1.7}
+.foot__cols a:hover{text-decoration:underline;text-underline-offset:4px}
+.sub{display:flex;border-bottom:1px solid var(--snow);margin-top:6px;max-width:360px}
+.sub input{flex:1;background:none;border:0;color:var(--snow);font:inherit;font-size:15px;padding:10px 0;outline:none}
+.sub input::placeholder{color:var(--fog)}
+.sub button{background:none;border:0;color:var(--snow);font-family:var(--mono);font-size:12px;letter-spacing:.1em;cursor:pointer}
+.foot__base{display:flex;justify-content:space-between;margin-top:70px;opacity:.5;gap:20px;flex-wrap:wrap}
+
+/* ---------- responsive ---------- */
+@media (max-width:980px){
+  .nav__links{display:none}
+  .hero__foot{grid-template-columns:1fr;gap:18px}
+  .cond{grid-template-columns:repeat(2,auto);justify-content:start}
+  .drop{display:none}
+  .manifesto__grid,.runs__grid{grid-template-columns:1fr}
+  .stats{grid-template-columns:1fr 1fr}
+  .stat{padding:22px 14px 22px 0 !important;border-bottom:1px solid var(--line)}
+  .stat:nth-child(2n){border-right:0;padding-left:14px !important}
+  .stat:nth-child(2n+1){padding-left:0 !important}
+  .row{grid-template-columns:40px 1fr;gap:8px 14px}
+  .row__d{grid-column:2}
+  .row__tag{grid-column:2;text-align:left}
+  .row__img{display:block;grid-column:2;aspect-ratio:16/9;overflow:hidden;margin-top:8px}
+  .row__img img{width:100%;height:100%;object-fit:cover}
+  .peek{display:none}
+  .offer__head,.ride__top{flex-direction:column;align-items:start}
+  .passes__cards{grid-template-columns:1fr}
+  .pass{border-right:0;border-bottom:1px solid var(--graphite);min-height:0}
+  .pass:last-child{border-bottom:0}
+  .run{grid-template-columns:20px 1fr 70px}
+  .run svg{display:none}
+  .foot__cols{grid-template-columns:1fr 1fr}
+  .foot__cols > div:first-child{grid-column:1/-1}
+  .alti{display:none}
+  .shot{height:46vh}.shot.w{width:34vh}.shot.x{width:62vh}.shot.m{width:48vh}.shot.text{width:44vh}
+}
+@media (prefers-reduced-motion:reduce){
+  *{animation:none !important;transition:none !important}
+  .hero__title span{transform:none}
+  .reveal{opacity:1;transform:none}
+  #trail .rider{display:none}
+}
+</style>
+</head>
+<body>
+
+<!-- logo symbol, reused -->
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+  <symbol id="mark" viewBox="0 0 64 64">
+    <!-- outer ring, broken where the carve exits -->
+    <path d="M52.6 50.6 A28 28 0 1 1 58.4 40" fill="none" stroke="currentColor" stroke-width="2.2"/>
+    <!-- the peak -->
+    <path d="M12 46 L27 18 L33.5 30" fill="none" stroke="currentColor" stroke-width="3.6" stroke-linejoin="miter" stroke-linecap="square"/>
+    <!-- second, smaller grey ridge -->
+    <path d="M30 46 L40 28 L48 42" fill="none" stroke="currentColor" stroke-width="2.2" opacity=".5"/>
+    <!-- the carve: rider's track out of the peak and off the badge -->
+    <path d="M33.5 30 C 42 35, 24 39, 34 44 S 54 50, 63 46" fill="none" stroke="currentColor" stroke-width="3.6" stroke-linecap="round"/>
+    <circle cx="27" cy="11.5" r="2.4" fill="currentColor"/>
+  </symbol>
+</svg>
+
+<header class="nav" id="nav">
+  <a href="#top" class="brand" aria-label="Grauhorn home">
+    <svg><use href="#mark"/></svg>
+    <span class="brand__word">GRAUHORN<small>Alpine · 2940 m</small></span>
+  </a>
+  <nav class="nav__links">
+    <a href="#mountain">Mountain</a>
+    <a href="#offer">What we offer</a>
+    <a href="#runs">Runs</a>
+    <a href="#passes">Passes</a>
+  </nav>
+  <a href="#passes" class="btn">Book a pass →</a>
+</header>
+
+<aside class="alti" aria-hidden="true">
+  <div class="alti__read"><b id="altVal">2940</b> m · altitude</div>
+  <div class="alti__scale"><span class="alti__mark" id="altMark"></span></div>
+</aside>
+
+<main id="top">
+
+<section class="hero">
+  <img class="hero__img bw" id="heroImg" src="img/photo-1560710990-9f5d4197b5a2.jpg" alt="Black-and-white view of a jagged snowy massif">
+  <div class="hero__inner">
+    <div class="hero__coords mono">
+      <span>46°02′N &nbsp; 7°44′E</span>
+      <span>Season 26/27 · Open Dec 06 — Apr 26</span>
+    </div>
+    <div>
+      <div class="hero__clip"><h1 class="hero__title"><span>GRAUHORN</span></h1></div>
+      <div class="hero__foot">
+        <p class="hero__lede">A grey mountain, 2,940 metres tall, with one rule: the snow does the talking. Ski it, ride it, or just sit at the top and listen.</p>
+        <dl class="cond">
+          <div><dt><span class="live"></span>Summit</dt><dd>−11 °C</dd></div>
+          <div><dt>Base depth</dt><dd>142 cm</dd></div>
+          <div><dt>New · 24 h</dt><dd>18 cm</dd></div>
+          <div><dt>Lifts open</dt><dd>29 / 31</dd></div>
+        </dl>
+        <div class="drop">Drop in <i></i></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="manifesto wrap" id="mountain">
+  <div class="manifesto__grid">
+    <div class="reveal">
+      <span class="label mono">01 — The mountain</span>
+      <h2 style="margin-top:28px">Colour<br>is <em>overrated.</em></h2>
+      <p class="big">Up here everything turns to <b>white, ash and granite</b>. No billboards on the pistes, no music on the lifts. Just 118 km of groomed corduroy, couloirs that hold powder for days, and a valley that goes quiet when the last chair stops.</p>
+    </div>
+    <figure class="manifesto__photo reveal">
+      <img class="bw" data-par="0.12" src="img/photo-1478700485868-972b69dc3fc4.jpg" alt="Snowboarder carving down a steep mountain face">
+      <figcaption class="mono">North face · 2,610 m</figcaption>
+    </figure>
+  </div>
+
+  <div class="stats">
+    <div class="stat reveal"><b data-count="118">0<sup>km</sup></b><span class="mono">Marked pistes</span></div>
+    <div class="stat reveal"><b data-count="1760">0<sup>m</sup></b><span class="mono">Vertical drop</span></div>
+    <div class="stat reveal"><b data-count="31">0</b><span class="mono">Lifts &amp; gondolas</span></div>
+    <div class="stat reveal"><b data-count="164">0<sup>days</sup></b><span class="mono">Of snow, average</span></div>
+  </div>
+</section>
+
+<section class="offer" id="offer">
+  <div class="wrap">
+    <div class="offer__head reveal">
+      <div>
+        <span class="label mono">02 — What we offer</span>
+        <h2 style="margin-top:28px">Eight ways<br>down <em>(and one up)</em></h2>
+      </div>
+      <p>Everything you need for a day on the mountain sits within one pass and one valley. Hover a line to look closer.</p>
+    </div>
+
+    <div class="rows" id="rows">
+      <article class="row" data-img="img/photo-1504480899134-8d1752cc1162.jpg">
+        <span class="row__n">01</span><h3 class="row__t">Pistes</h3>
+        <p class="row__d">118 km groomed nightly by a fleet of 14 snowcats, from wide blue cruisers at the base to the 3.4 km Granite black off the summit.</p>
+        <span class="row__tag">All levels</span>
+        <div class="row__img"><img class="bw" loading="lazy" alt="Skier in grayscale" src="img/photo-1504480899134-8d1752cc1162.jpg"></div>
+      </article>
+      <article class="row" data-img="img/photo-1637579176850-54e835ba0d7b.jpg">
+        <span class="row__n">02</span><h3 class="row__t">The Foundry park</h3>
+        <p class="row__d">A 1.2 km snowpark with 40+ features, three jump lines, a 6 m superpipe and a beginner line with soft boxes. Reshaped every Thursday.</p>
+        <span class="row__tag">Freestyle</span>
+        <div class="row__img"><img class="bw" loading="lazy" alt="Snowboard on a wooden ramp" src="img/photo-1637579176850-54e835ba0d7b.jpg"></div>
+      </article>
+      <article class="row" data-img="img/photo-1647644768239-6e937d5e9743.jpg">
+        <span class="row__n">03</span><h3 class="row__t">Freeride zones</h3>
+        <p class="row__d">Four patrolled off-piste sectors and two couloirs, avalanche-controlled each morning. Transceiver check gates at every entrance.</p>
+        <span class="row__tag">Advanced</span>
+        <div class="row__img"><img class="bw" loading="lazy" alt="Snowboarder riding a snowy slope" src="img/photo-1647644768239-6e937d5e9743.jpg"></div>
+      </article>
+      <article class="row" data-img="img/photo-1646912346405-425c3861978d.jpg">
+        <span class="row__n">04</span><h3 class="row__t">Ride school</h3>
+        <p class="row__d">Ski and snowboard lessons for ages 4 and up. Small groups of max. six, private coaching, and a three-day "first turns" guarantee.</p>
+        <span class="row__tag">Lessons</span>
+        <div class="row__img"><img class="bw" loading="lazy" alt="Rider holding a snowboard on a slope" src="img/photo-1646912346405-425c3861978d.jpg"></div>
+      </article>
+      <article class="row" data-img="img/photo-1760373899533-dcfe3baa5be0.jpg">
+        <span class="row__n">05</span><h3 class="row__t">Edge Lab rental</h3>
+        <p class="row__d">Current-season skis and boards, boot fitting with heat-moulded liners, and a workshop that sharpens and waxes overnight.</p>
+        <span class="row__tag">Gear</span>
+        <div class="row__img"><img class="bw" loading="lazy" alt="Two snowboards standing in the snow" src="img/photo-1760373899533-dcfe3baa5be0.jpg"></div>
+      </article>
+      <article class="row" data-img="img/photo-1600765282606-cddb34613aa2.jpg">
+        <span class="row__n">06</span><h3 class="row__t">Guided touring</h3>
+        <p class="row__d">Splitboard and ski-touring days with certified mountain guides. Skins, probes and beacons included. The "one up" from the heading.</p>
+        <span class="row__tag">Backcountry</span>
+        <div class="row__img"><img class="bw" loading="lazy" alt="Person hiking up a snowy ridge" src="img/photo-1600765282606-cddb34613aa2.jpg"></div>
+      </article>
+      <article class="row" data-img="img/photo-1554176259-aa961fc32671.jpg">
+        <span class="row__n">07</span><h3 class="row__t">Night runs</h3>
+        <p class="row__d">Wednesday and Saturday, 18:30–22:00. Four floodlit pistes and the park's jump line, followed by fondue at the Kessel hut.</p>
+        <span class="row__tag">After dark</span>
+        <div class="row__img"><img class="bw" loading="lazy" alt="Snowy mountain at night" src="img/photo-1554176259-aa961fc32671.jpg"></div>
+      </article>
+      <article class="row" data-img="img/photo-1737380047092-e0cb34e12f84.jpg">
+        <span class="row__n">08</span><h3 class="row__t">Summit lodge &amp; sauna</h3>
+        <p class="row__d">Twenty-two rooms at 2,890 m, a wood-fired sauna on the ridge and a kitchen that cooks with what the valley grows.</p>
+        <span class="row__tag">Stay</span>
+        <div class="row__img"><img class="bw" loading="lazy" alt="Snowboarder resting on a summit" src="img/photo-1737380047092-e0cb34e12f84.jpg"></div>
+      </article>
+    </div>
+  </div>
+  <div class="peek" id="peek"><img class="bw" alt=""></div>
+</section>
+
+<section class="ride" id="ride">
+  <div class="ride__sticky">
+    <div class="ride__top">
+      <div>
+        <span class="label mono" style="color:var(--fog)">03 — Field notes</span>
+        <h2 style="margin-top:24px">One day,<br><em>top to bottom.</em></h2>
+      </div>
+      <span class="mono" style="opacity:.6">Keep scrolling →</span>
+    </div>
+    <div class="ride__track" id="track">
+      <figure class="shot text"><span class="mono" style="opacity:.6">07:45 · Gondola I</span><p>First chair goes up in the dark. By the time you reach the ridge, the sun is on the peak and nobody has touched the snow.</p><span class="mono" style="opacity:.6">−14 °C</span></figure>
+      <figure class="shot x"><img class="bw" loading="lazy" src="img/photo-1493767147706-462e7ec5ef11.jpg" alt="Fog drifting over snowy peaks"><figcaption class="mono"><span>08:10</span><span>Ridge</span></figcaption></figure>
+      <figure class="shot w"><img class="bw" loading="lazy" src="img/photo-1613252064834-4750dd885a6e.jpg" alt="Snowboarder riding fresh snow"><figcaption class="mono"><span>09:30</span><span>Couloir 2</span></figcaption></figure>
+      <figure class="shot m"><img class="bw" loading="lazy" src="img/photo-1549880181-56a44cf4a9a5.jpg" alt="Mountain ranges covered in snow"><figcaption class="mono"><span>11:00</span><span>Plateau</span></figcaption></figure>
+      <figure class="shot w"><img class="bw" loading="lazy" src="img/photo-1518608774889-b04d2abe7702.jpg" alt="Person holding a snowboard"><figcaption class="mono"><span>13:20</span><span>Foundry</span></figcaption></figure>
+      <figure class="shot w"><img class="bw" loading="lazy" src="img/photo-1590457894572-b9808e7b4380.jpg" alt="Rider sitting in the snow"><figcaption class="mono"><span>15:40</span><span>Break</span></figcaption></figure>
+      <figure class="shot x"><img class="bw" loading="lazy" src="img/photo-1477468572316-36979010099d.jpg" alt="Mountain with fog at dusk"><figcaption class="mono"><span>16:55</span><span>Last chair</span></figcaption></figure>
+      <figure class="shot text"><span class="mono" style="opacity:.6">17:30 · Valley</span><p>Boots off, legs gone, cheeks burning. Same time tomorrow?</p><span class="mono" style="opacity:.6">1,180 m</span></figure>
+    </div>
+    <div class="ride__bar"><i id="rideBar"></i></div>
+  </div>
+</section>
+
+<section class="runs wrap" id="runs">
+  <div class="runs__grid">
+    <div class="reveal">
+      <span class="label mono">04 — Runs</span>
+      <h2 style="margin-top:28px">Graded<br>in <em>grey.</em></h2>
+      <p style="margin-top:26px;color:var(--slate);font-size:17px;line-height:1.5;max-width:34ch">Our trail markers follow the mountain's palette. The darker the sign, the steeper the line.</p>
+      <div class="legend">
+        <div><i class="mk easy"></i>White — easy, wide, forgiving</div>
+        <div><i class="mk mid"></i>Ash — intermediate, rolling pitch</div>
+        <div><i class="mk hard"></i>Graphite — expert, steep and long</div>
+        <div><i class="mk free"></i>Hatched — freeride, ungroomed</div>
+      </div>
+    </div>
+    <div class="runlist reveal" id="runlist"></div>
+  </div>
+</section>
+
+<section class="passes" id="passes">
+  <div class="wrap">
+    <div class="reveal">
+      <span class="label mono">05 — Passes</span>
+      <h2 style="margin-top:28px">Pick your<br><em>altitude.</em></h2>
+    </div>
+    <div class="passes__cards reveal">
+      <div class="pass">
+        <div class="pass__name mono"><span>Day pass</span><span>01</span></div>
+        <div class="pass__price">€74<sub>/ day</sub></div>
+        <ul class="pass__list"><li>All 31 lifts, 08:00–16:45</li><li>The Foundry park</li><li>Free under 8s with an adult</li></ul>
+        <a href="#" class="btn">Choose day</a>
+      </div>
+      <div class="pass">
+        <div class="pass__name mono"><span>Six days</span><span>02</span></div>
+        <div class="pass__price">€389<sub>/ week</sub></div>
+        <ul class="pass__list"><li>Everything in Day</li><li>Two night-run sessions</li><li>One free Edge Lab tune-up</li><li>Summit sauna, 1 visit</li></ul>
+        <a href="#" class="btn btn--fill">Choose week</a>
+      </div>
+      <div class="pass">
+        <div class="pass__name mono"><span>Season</span><span>03</span></div>
+        <div class="pass__price">€1,190<sub>/ 26–27</sub></div>
+        <ul class="pass__list"><li>Unlimited riding, Dec–Apr</li><li>First chair priority line</li><li>All night runs</li><li>20% off school &amp; rental</li></ul>
+        <a href="#" class="btn">Choose season</a>
+      </div>
+    </div>
+  </div>
+</section>
+
+</main>
+
+<footer class="foot">
+  <div class="wrap">
+    <div class="foot__big reveal">
+      <svg aria-hidden="true"><use href="#mark"/></svg>
+      <h2>See you<br><em>at the top.</em></h2>
+    </div>
+    <div class="foot__cols">
+      <div>
+        <h4>Snow report by email</h4>
+        <p style="max-width:34ch;opacity:.75">One short message at 06:30 on powder days. Nothing else.</p>
+        <form class="sub" onsubmit="event.preventDefault();this.querySelector('button').textContent='Subscribed ✓'">
+          <input type="email" placeholder="you@email.com" aria-label="Email address" required>
+          <button type="submit">Subscribe →</button>
+        </form>
+      </div>
+      <div><h4>Visit</h4><p>Talstation 1<br>Grauhorn Valley<br>The Alps</p></div>
+      <div><h4>Explore</h4><a href="#mountain">Mountain</a><a href="#offer">What we offer</a><a href="#runs">Runs</a><a href="#passes">Passes</a></div>
+      <div><h4>Follow</h4><a href="#">Instagram</a><a href="#">YouTube</a><a href="#">Webcams</a></div>
+    </div>
+    <div class="foot__base mono"><span>© 2026 Grauhorn Alpine — exhibition concept</span><span>Photos: Unsplash</span></div>
+  </div>
+</footer>
+
+
+<script>
+(() => {
+const reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
+const $ = s => document.querySelector(s);
+const NS = 'http://www.w3.org/2000/svg';
+
+/* ---------- runs list ---------- */
+const runs = [
+  ['easy','Kinderwiese','Base area · magic carpet',0.6,[0,.08,.12,.2,.24,.3]],
+  ['easy','Long White','Summit to valley cruiser',7.8,[0,.12,.2,.34,.46,.6,.7,.82]],
+  ['mid','Ash Bowl','Wide open bowl, rolling',2.9,[0,.2,.28,.5,.6,.78]],
+  ['mid','Schattenweg','Tree-lined, holds snow',3.6,[0,.15,.35,.45,.62,.74,.86]],
+  ['hard','Granite','Summit face · 38° max',3.4,[0,.32,.5,.72,.8,.95]],
+  ['hard','Nordwand','Moguls, north facing',1.9,[0,.4,.55,.8,.92]],
+  ['free','Couloir 2','Patrolled, ungroomed',1.1,[0,.45,.78,.92,1]],
+];
+const rl = $('#runlist');
+runs.forEach(([k,n,s,len,pr])=>{
+  const W=170,H=34,step=W/(pr.length-1);
+  const pts=pr.map((v,i)=>[i*step, 3+v*(H-6)]);
+  const d='M'+pts.map(p=>p.join(' ')).join(' L');
+  rl.insertAdjacentHTML('beforeend',`<div class="run"><i class="mk ${k}"></i><h3>${n}<small>${s}</small></h3><svg viewBox="0 0 ${W} ${H}" preserveAspectRatio="none"><path class="a" d="${d} L${W} ${H} L0 ${H}Z"/><path d="${d}"/></svg><span class="len">${len.toFixed(1)} km</span></div>`);
+});
+
+/* ---------- reveal + counters ---------- */
+const io = new IntersectionObserver(es=>es.forEach(e=>{
+  if(!e.isIntersecting) return;
+  e.target.classList.add('in'); io.unobserve(e.target);
+  e.target.querySelectorAll('[data-count]').forEach(b=>{
+    const to=+b.dataset.count, sup=b.querySelector('sup'), t0=performance.now();
+    const tick=t=>{const p=Math.min(1,(t-t0)/1400),v=Math.round(to*(1-Math.pow(1-p,3)));
+      b.firstChild.nodeValue=v.toLocaleString('en-US'); if(p<1) requestAnimationFrame(tick);};
+    reduce ? b.firstChild.nodeValue=to.toLocaleString('en-US') : requestAnimationFrame(tick);
+  });
+}),{threshold:.18});
+document.querySelectorAll('.reveal').forEach(el=>io.observe(el));
+
+/* ---------- hover peek ---------- */
+const peek=$('#peek'), peekImg=peek.querySelector('img');
+let px=0,py=0,tx=0,ty=0;
+document.querySelectorAll('.row').forEach(r=>{
+  r.addEventListener('mouseenter',()=>{peekImg.src=r.dataset.img;peek.classList.add('on')});
+  r.addEventListener('mouseleave',()=>peek.classList.remove('on'));
+});
+addEventListener('mousemove',e=>{tx=e.clientX+180;ty=e.clientY});
+
+
+/* ---------- trail: two riders on carved lines ---------- */
+const svg=document.createElementNS(NS,'svg'); svg.id='trail'; document.body.appendChild(svg);
+const mk=(tag,attrs,parent=svg)=>{const e=document.createElementNS(NS,tag);for(const k in attrs)e.setAttribute(k,attrs[k]);parent.appendChild(e);return e};
+
+const BOARDER=`<ellipse class="halo" cx="0" cy="-22" rx="30" ry="30"/>
+ <rect class="board" x="-25" y="-3" width="50" height="5.5" rx="2.75"/>
+ <path d="M-9 -3 L-5 -15 L1 -24"/><path d="M9 -3 L7 -14 L1 -24"/>
+ <path d="M1 -24 L5 -38"/><circle class="head" cx="7.5" cy="-45" r="5.6"/>
+ <path d="M5 -36 L-8 -31 L-18 -35"/><path d="M5 -36 L15 -29 L24 -31"/>`;
+const SKIER=`<ellipse class="halo" cx="0" cy="-22" rx="30" ry="30"/>
+ <path d="M-24 0 H17 Q23 0 25 -5" style="stroke-width:3"/><path d="M-20 -4 H19 Q25 -4 27 -9" style="stroke-width:3" opacity=".55"/>
+ <path d="M-4 -2 L4 -13 L-5 -23"/><path d="M2 -5 L9 -15 L-3 -23"/>
+ <path d="M-4 -23 L5 -37"/><circle class="head" cx="9" cy="-43" r="5.6"/>
+ <path d="M5 -35 L13 -26" /><path d="M13 -26 L-14 -2" style="stroke-width:2"/>
+ <path d="M4 -34 L8 -24" opacity=".55"/><path d="M8 -24 L-18 -6" style="stroke-width:2" opacity=".55"/>`;
+
+const riders=[
+  {art:BOARDER, mirror:false, anchor:.58, phase:0},
+  {art:SKIER,   mirror:true,  anchor:.34, phase:.5}
+];
+riders.forEach(r=>{
+  r.ghost=mk('path',{class:'ghost'});
+  r.cut=mk('path',{class:'cut'+(r.mirror?' ski':'')});
+  r.g=mk('g',{class:'rider'}); r.g.innerHTML=r.art;
+  r.ang=0; r.face=1; r.x=0; r.y=0; r.prevLen=0;
+});
+
+let docH=0, vw=0, vh=0, startY=0, endY=0;
+function buildPaths(){
+  vw=document.documentElement.clientWidth; vh=innerHeight;
+  svg.style.height='0px'; svg.setAttribute('height',0);
+  docH=document.documentElement.scrollHeight;
+  svg.setAttribute('width',vw); svg.setAttribute('height',docH);
+  svg.style.height=docH+'px';
+  startY=$('.hero').offsetHeight+60; endY=docH - $('.foot').offsetHeight*.55;
+  const step=Math.max(520,vh*.78);
+  riders.forEach((r,idx)=>{
+    const L=vw*.07, R=vw*.93;
+    let pts=[]; let y=startY - (r.phase*step); let side = idx===0?0:1;
+    pts.push([r.mirror? R : L + vw*.18, startY]);
+    y=startY;
+    let i=1;
+    while(y<endY){
+      y=Math.min(endY, startY + i*step - r.phase*step*.6);
+      if(y<=pts[pts.length-1][1]+40){i++;continue}
+      const wob=(Math.sin(i*1.7+idx*2)*.08)*vw;
+      const x=((i+side)%2===0? L : R)+wob;
+      pts.push([Math.max(vw*.04,Math.min(vw*.96,x)), y]); i++;
+    }
+    let d=`M${pts[0][0]} ${pts[0][1]}`;
+    for(let k=1;k<pts.length;k++){
+      const [x0,y0]=pts[k-1],[x1,y1]=pts[k],h=y1-y0,dx=x1-x0;
+      d+=` C${x0+dx*.18} ${y0+h*.42}, ${x1-dx*.12} ${y1-h*.62}, ${x1} ${y1}`;
+    }
+    r.ghost.setAttribute('d',d); r.cut.setAttribute('d',d);
+    r.len=r.cut.getTotalLength();
+    r.cut.style.strokeDasharray=r.len; r.cut.style.strokeDashoffset=r.len;
+    // lookup table: length -> point, monotone in y
+    r.lut=[]; for(let s=0;s<=r.len;s+=4){const p=r.cut.getPointAtLength(s);r.lut.push([s,p.x,p.y])}
+  });
+}
+function lenAtY(r,y){
+  const t=r.lut; if(y<=t[0][2]) return 0; if(y>=t[t.length-1][2]) return r.len;
+  let lo=0,hi=t.length-1; while(hi-lo>1){const m=(lo+hi)>>1; (t[m][2]<y?lo=m:hi=m)}
+  const a=t[lo],b=t[hi],f=(y-a[2])/((b[2]-a[2])||1); return a[0]+(b[0]-a[0])*f;
+}
+
+
+/* ---------- altimeter ---------- */
+const altVal=$('#altVal'), altMark=$('#altMark');
+
+/* ---------- horizontal ride ---------- */
+const ride=$('#ride'), track=$('#track'), rideBar=$('#rideBar');
+
+/* ---------- nav ---------- */
+const nav=$('#nav');
+
+/* ---------- loop ---------- */
+let lastY=scrollY;
+function frame(){
+  const y=scrollY, dy=y-lastY; lastY=y;
+  nav.classList.toggle('is-solid', y>vh*.75);
+
+  // hero parallax
+  $('#heroImg').style.transform=`translateY(${y*.25}px) scale(${1+y/vh*.06})`;
+  document.querySelectorAll('[data-par]').forEach(el=>{
+    const rc=el.parentElement.getBoundingClientRect();
+    el.style.transform=`translateY(${(rc.top-vh/2)*-el.dataset.par}px)`;
+  });
+
+  // horizontal ride
+  const rr=ride.getBoundingClientRect(), span=ride.offsetHeight-vh;
+  const rp=Math.min(1,Math.max(0,-rr.top/span));
+  const maxX=track.scrollWidth-vw;
+  track.style.transform=`translateX(${-rp*maxX}px)`;
+  rideBar.style.width=(rp*100)+'%';
+
+  // altimeter
+  const prog=Math.min(1,Math.max(0,y/(docH-vh)));
+  altVal.textContent=Math.round(2940-prog*(2940-1180)).toLocaleString('en-US');
+  altMark.style.top=(prog*100)+'%';
+
+  // peek follow
+  px+=(tx-px)*.15; py+=(ty-py)*.15;
+  peek.style.left=px+'px'; peek.style.top=py+'px';
+
+  // riders
+  if(!reduce) riders.forEach(r=>{
+    const target=lenAtY(r, y+vh*r.anchor);
+    const L=r.prevLen+(target-r.prevLen)*.18; const moved=L-r.prevLen; r.prevLen=L;
+    const p=r.cut.getPointAtLength(L), q=r.cut.getPointAtLength(Math.min(r.len,L+6));
+    let ddx=q.x-p.x, ddy=q.y-p.y; if(Math.abs(ddx)+Math.abs(ddy)<.01){ddx=r.face;ddy=0}
+    const face = Math.abs(ddx)>.4 ? Math.sign(ddx) : r.face; r.face=face;
+    // visual slope: clamp so the rider never looks like it's falling off a wall
+    let slope=Math.atan2(ddy, Math.abs(ddx))*180/Math.PI; slope=Math.max(-8,Math.min(32,slope));
+    if(moved<0) slope*=.5;
+    r.ang+=(slope-r.ang)*.2;
+    r.g.setAttribute('transform',`translate(${p.x} ${p.y}) scale(${face} 1) rotate(${r.ang})`);
+    r.cut.style.strokeDashoffset=r.len-L;
+  });
+
+  requestAnimationFrame(frame);
+}
+
+function fitTitle(){const t=$('.hero__title'),w=$('.hero__inner').clientWidth-2*parseFloat(getComputedStyle($('.hero__inner')).paddingLeft);t.style.fontSize='100px';t.style.fontSize=(100*w/t.scrollWidth*.99)+'px'}
+function layout(){fitTitle();buildPaths()}
+layout();
+let rt; new ResizeObserver(()=>{clearTimeout(rt);rt=setTimeout(layout,120)}).observe(document.body);
+addEventListener('load',layout);document.fonts&&document.fonts.ready.then(layout);
+requestAnimationFrame(frame);
+})();
+</script>
+</body>
+</html>
