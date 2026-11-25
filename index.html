@@ -646,7 +646,7 @@ function frame(){
   requestAnimationFrame(frame);
 }
 
-function fitTitle(){const t=$('.hero__title'),w=$('.hero__inner').clientWidth-2*parseFloat(getComputedStyle($('.hero__inner')).paddingLeft);t.style.fontSize='100px';t.style.fontSize=(100*w/t.scrollWidth*.99)+'px'}
+function fitTitle(){const t=$('.hero__title'),w=$('.hero__inner').clientWidth-2*parseFloat(getComputedStyle($('.hero__inner')).paddingLeft);t.style.fontSize='100px';t.style.fontSize=(100*w/t.firstElementChild.offsetWidth*.99)+'px'}
 function layout(){fitTitle();buildPaths()}
 layout();
 let rt; new ResizeObserver(()=>{clearTimeout(rt);rt=setTimeout(layout,120)}).observe(document.body);
